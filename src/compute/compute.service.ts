@@ -16,6 +16,7 @@ export class ComputeService {
   // Ignore SSL Errors
   private httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
+  
   // --- Create VM ---
   async createInstance(name: string, cores: number, memory: number, password: string) {
     try {
@@ -79,6 +80,21 @@ export class ComputeService {
     }
   }
 
+  // --- Fetch All VMs ---
+  async fetchInstances() {
+    try {
+      const response = await axios.get(`${this.proxmoxUrl}/nodes/${this.nodeId}/lxc`, {
+        headers: this.headers,
+        httpsAgent: this.httpsAgent,
+      });
+      return response.data.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error(axiosError.response?.data);
+      throw new HttpException('Failed to fetch VMs', HttpStatus.BAD_REQUEST);
+    }
+  }
+
   // --- Update VM Resources ---
   async updateInstance(vmid: number, cores: number, memory: number) {
     try {
@@ -90,6 +106,38 @@ export class ComputeService {
       return { message: `VM ${vmid} updated successfully` };
     } catch (error) {
       throw new HttpException('Failed to update VM', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // --- Start VM ---
+  async startInstance(vmid: number) {
+    try {
+      await axios.post(
+        `${this.proxmoxUrl}/nodes/${this.nodeId}/lxc/${vmid}/status/start`,
+        {},
+        { headers: this.headers, httpsAgent: this.httpsAgent },
+      );
+      return { message: `VM ${vmid} started successfully` };
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error(axiosError.response?.data);
+      throw new HttpException('Failed to start VM', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // --- Stop VM ---
+  async stopInstance(vmid: number) {
+    try {
+      await axios.post(
+        `${this.proxmoxUrl}/nodes/${this.nodeId}/lxc/${vmid}/status/stop`,
+        {},
+        { headers: this.headers, httpsAgent: this.httpsAgent },
+      );
+      return { message: `VM ${vmid} stopped successfully` };
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error(axiosError.response?.data);
+      throw new HttpException('Failed to stop VM', HttpStatus.BAD_REQUEST);
     }
   }
 }

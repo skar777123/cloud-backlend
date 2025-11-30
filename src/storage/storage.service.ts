@@ -1,5 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import * as Minio from 'minio';
+import { Stream } from 'stream';
 
 interface MinioError extends Error {
   code?: string;
@@ -28,6 +29,7 @@ export class StorageService {
     }
   }
 
+
   // --- Create Bucket ---
   async createBucket(bucketName: string) {
     try {
@@ -35,7 +37,7 @@ export class StorageService {
       if (exists) {
         throw new HttpException('Bucket already exists', HttpStatus.CONFLICT);
       }
-      await this.minioClient.makeBucket(bucketName, 'us-east-1');
+      await this.minioClient.makeBucket(bucketName);
       return { message: `Bucket '${bucketName}' created successfully` };
     } catch (error) {
       const minioError = error as MinioError;

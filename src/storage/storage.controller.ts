@@ -2,26 +2,30 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   UploadedFile,
   UseInterceptors,
   Param,
+  Put,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from './storage.service';
 
-@Controller('storage')
+@Controller()
 export class StorageController {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(private readonly storageService: StorageService) { }
 
   @Get('buckets')
   async getBuckets() {
     return this.storageService.listBuckets();
   }
 
-  @Post('buckets')
-  async createBucket(@Body('name') name: string) {
-    return this.storageService.createBucket(name);
+
+
+  @Put(':bucketname')
+  async createBucketPut(@Param('bucketname') bucketname: string) {
+    return this.storageService.createBucket(bucketname);
   }
 
   @Post('buckets/:name/upload')
